@@ -17,4 +17,4 @@ RUN chmod 0644 /etc/cron.d/ssl-monitor \
 VOLUME ["/var/log/ssl-monitor"]
 
 # 将环境变量导入 cron 环境
-CMD printenv > /etc/environment && cron && tail -f /var/log/ssl-monitor/ssl-monitor.log
+CMD printenv > /etc/environment && mkdir -p /var/log/ssl-monitor && touch /var/log/ssl-monitor/ssl-monitor.log && cron && tail -f /var/log/ssl-monitor/ssl-monitor.log
