@@ -1,0 +1,39 @@
+# SSL 证书过期监控配置
+
+domains:
+  - host: example.com
+    port: 443
+  - host: www.example.com
+    port: 443
+  # 添加更多域名...
+  # - host: api.example.com
+  #   port: 443
+
+# 告警阈值（天），证书剩余天数 <= 任一阈值时触发告警
+alert_thresholds: [30, 14, 7, 1]
+
+# 通知渠道配置
+notifiers:
+  email:
+    enabled: false
+    smtp_host: smtp.example.com
+    smtp_port: 465
+    smtp_user: ${SMTP_USER}
+    smtp_password: ${SMTP_PASSWORD}
+    sender: ${SMTP_USER}
+    recipients:
+      - admin@example.com
+    use_ssl: true
+
+  wecom:
+    enabled: false
+    webhook_url: ${WECOM_WEBHOOK_URL}
+
+  dingtalk:
+    enabled: false
+    webhook_url: ${DINGTALK_WEBHOOK_URL}
+    secret: ${DINGTALK_SECRET}
+
+  slack:
+    enabled: false
+    webhook_url: ${SLACK_WEBHOOK_URL}
