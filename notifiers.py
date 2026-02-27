@@ -17,7 +17,7 @@ def send_email(config: dict, message: str, subject: str) -> None:
     host = config["smtp_host"]
     port = config.get("smtp_port", 465)
     user = config["smtp_user"]
-    password = config["smtp_password"]
+    password = config.get("smtp_auth_code") or config.get("smtp_password", "")
     sender = config.get("sender", user)
     recipients = config["recipients"]
     if isinstance(recipients, str):

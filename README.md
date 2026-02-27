@@ -67,7 +67,7 @@ docker run -d --name ssl-monitor \
   -e SMTP_HOST=smtp.example.com \
   -e SMTP_PORT=465 \
   -e SMTP_USER=your@email.com \
-  -e SMTP_PASSWORD=your-password \
+  -e SMTP_AUTH_CODE=your-auth-code \
   -e SMTP_SENDER=your@email.com \
   -e SMTP_RECIPIENTS=admin@example.com,ops@example.com \
   pengpdx/ssl-cert-monitor:latest
@@ -81,7 +81,7 @@ docker run -d --name ssl-monitor \
 | `SMTP_HOST` | SMTP 服务器地址 | `smtp.example.com` |
 | `SMTP_PORT` | SMTP 端口 | `465` |
 | `SMTP_USER` | SMTP 登录账号 | - |
-| `SMTP_PASSWORD` | SMTP 登录密码 | - |
+| `SMTP_AUTH_CODE` | SMTP 授权码（非登录密码） | - |
 | `SMTP_SENDER` | 发件人地址 | 同 `SMTP_USER` |
 | `SMTP_RECIPIENTS` | 收件人，多个用逗号分隔 | - |
 | `WECOM_WEBHOOK_URL` | 企业微信 Webhook | - |
@@ -115,7 +115,7 @@ docker build -t ssl-cert-monitor .
 -e EMAIL_ENABLED=true \
 -e SMTP_HOST=smtp.example.com \
 -e SMTP_USER=your@email.com \
--e SMTP_PASSWORD=your-password \
+-e SMTP_AUTH_CODE=your-auth-code \
 -e SMTP_SENDER=noreply@example.com \
 -e SMTP_RECIPIENTS=admin@example.com,ops@example.com
 ```
@@ -129,7 +129,7 @@ notifiers:
     smtp_host: smtp.example.com
     smtp_port: 465
     smtp_user: ${SMTP_USER}
-    smtp_password: ${SMTP_PASSWORD}
+    smtp_auth_code: ${SMTP_AUTH_CODE}
     sender: ${SMTP_SENDER:-${SMTP_USER}}
     recipients: ${SMTP_RECIPIENTS}
     use_ssl: true

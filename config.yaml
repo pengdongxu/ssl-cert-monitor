@@ -19,7 +19,7 @@ notifiers:
     smtp_host: ${SMTP_HOST:-smtp.example.com}
     smtp_port: ${SMTP_PORT:-465}
     smtp_user: ${SMTP_USER}
-    smtp_password: ${SMTP_PASSWORD}
+    smtp_auth_code: ${SMTP_AUTH_CODE}
     sender: ${SMTP_SENDER:-${SMTP_USER}}
     recipients: ${SMTP_RECIPIENTS}
     use_ssl: true
