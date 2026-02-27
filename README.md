@@ -57,20 +57,21 @@ docker build -t ssl-cert-monitor .
 # 运行（配置文件挂载 + 环境变量传入密码）
 docker run -d --name ssl-monitor \
   -v $(pwd)/config.yaml:/app/config.yaml \
+  -v $(pwd)/logs:/var/log/ssl-monitor \
   -e SMTP_USER=admin@example.com \
   -e SMTP_PASSWORD=your-password \
   -e SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx \
   ssl-cert-monitor
 ```
 
-容器内通过 cron 每天北京时间 09:00（UTC 01:00）自动执行检查，日志写入 `/var/log/ssl-monitor.log`。
+容器内通过 cron 每天北京时间 09:00（UTC 01:00）自动执行检查，日志挂载到宿主机 `./logs/ssl-monitor.log`。
 
 ```bash
 # 手动触发一次检查
 docker exec ssl-monitor python /app/main.py
 
-# 查看日志
-docker exec ssl-monitor cat /var/log/ssl-monitor.log
+# 在宿主机上直接查看日志
+tail -f ./logs/ssl-monitor.log
 ```
 
 ## 通知渠道配置
