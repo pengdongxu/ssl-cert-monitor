@@ -7,7 +7,8 @@
 - 纯 Python 标准库实现证书检查（ssl + socket）
 - 支持四种通知渠道：邮件 / 企业微信 / 钉钉 / Slack
 - 多级告警阈值（默认 30、14、7、1 天）
-- 敏感配置支持 `${ENV_VAR}` 环境变量替换
+- 配置支持 `${ENV_VAR}` 和 `${ENV_VAR:-default}` 环境变量替换
+- Docker 部署时通过环境变量灵活配置发件人、收件人
 - Docker + cron 一键部署
 
 ## 快速开始
@@ -50,19 +51,43 @@ python main.py /path/to/config.yaml
 
 ## Docker 部署
 
-```bash
-# 构建镜像
-docker build -t ssl-cert-monitor .
+### 使用 DockerHub 镜像
 
-# 运行（配置文件挂载 + 环境变量传入密码）
+```bash
+docker pull pengpdx/ssl-cert-monitor:latest
+```
+
+### 运行
+
+```bash
 docker run -d --name ssl-monitor \
   -v $(pwd)/config.yaml:/app/config.yaml \
   -v $(pwd)/logs:/var/log/ssl-monitor \
-  -e SMTP_USER=admin@example.com \
+  -e EMAIL_ENABLED=true \
+  -e SMTP_HOST=smtp.example.com \
+  -e SMTP_PORT=465 \
+  -e SMTP_USER=your@email.com \
   -e SMTP_PASSWORD=your-password \
-  -e SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx \
-  ssl-cert-monitor
+  -e SMTP_SENDER=your@email.com \
+  -e SMTP_RECIPIENTS=admin@example.com,ops@example.com \
+  pengpdx/ssl-cert-monitor:latest
 ```
+
+### 环境变量说明
+
+| 变量 | 说明 | 默认值 |
+|------|------|--------|
+| `EMAIL_ENABLED` | 邮件通知开关 | `false` |
+| `SMTP_HOST` | SMTP 服务器地址 | `smtp.example.com` |
+| `SMTP_PORT` | SMTP 端口 | `465` |
+| `SMTP_USER` | SMTP 登录账号 | - |
+| `SMTP_PASSWORD` | SMTP 登录密码 | - |
+| `SMTP_SENDER` | 发件人地址 | 同 `SMTP_USER` |
+| `SMTP_RECIPIENTS` | 收件人，多个用逗号分隔 | - |
+| `WECOM_WEBHOOK_URL` | 企业微信 Webhook | - |
+| `DINGTALK_WEBHOOK_URL` | 钉钉 Webhook | - |
+| `DINGTALK_SECRET` | 钉钉加签密钥 | - |
+| `SLACK_WEBHOOK_URL` | Slack Webhook | - |
 
 容器内通过 cron 每天北京时间 09:00（UTC 01:00）自动执行检查，日志挂载到宿主机 `./logs/ssl-monitor.log`。
 
@@ -74,9 +99,28 @@ docker exec ssl-monitor python /app/main.py
 tail -f ./logs/ssl-monitor.log
 ```
 
+### 自行构建
+
+```bash
+docker build -t ssl-cert-monitor .
+```
+
 ## 通知渠道配置
 
 ### 邮件（SMTP）
+
+通过环境变量配置，Docker 部署时无需修改 config.yaml：
+
+```bash
+-e EMAIL_ENABLED=true \
+-e SMTP_HOST=smtp.example.com \
+-e SMTP_USER=your@email.com \
+-e SMTP_PASSWORD=your-password \
+-e SMTP_SENDER=noreply@example.com \
+-e SMTP_RECIPIENTS=admin@example.com,ops@example.com
+```
+
+也可以直接在 `config.yaml` 中配置：
 
 ```yaml
 notifiers:
@@ -86,10 +130,9 @@ notifiers:
     smtp_port: 465
     smtp_user: ${SMTP_USER}
     smtp_password: ${SMTP_PASSWORD}
-    recipients:
-      - admin@example.com
-      - ops@example.com
-    use_ssl: true          # false 则使用 STARTTLS
+    sender: ${SMTP_SENDER:-${SMTP_USER}}
+    recipients: ${SMTP_RECIPIENTS}
+    use_ssl: true
 ```
 
 ### 企业微信

@@ -25,15 +25,29 @@ NOTIFIER_MAP = {
     "slack": send_slack,
 }
 
-ENV_VAR_PATTERN = re.compile(r"\$\{(\w+)\}")
+ENV_VAR_PATTERN = re.compile(r"\$\{(\w+)(?::-([^}]*))?\}")
 
 
 def _replace_env_vars(obj):
-    """递归替换配置中的 ${ENV_VAR} 占位符为环境变量值。"""
+    """递归替换配置中的 ${ENV_VAR} 和 ${ENV_VAR:-default} 占位符为环境变量值。"""
     if isinstance(obj, str):
         def _replacer(m):
-            return os.environ.get(m.group(1), m.group(0))
-        return ENV_VAR_PATTERN.sub(_replacer, obj)
+            name, default = m.group(1), m.group(2)
+            val = os.environ.get(name)
+            if val is not None:
+                return val
+            if default is not None:
+                # 默认值中可能嵌套 ${VAR}，递归替换
+                return ENV_VAR_PATTERN.sub(_replacer, default)
+            return m.group(0)
+        result = ENV_VAR_PATTERN.sub(_replacer, obj)
+        # 处理布尔值字符串
+        if result.lower() in ("true", "false"):
+            return result.lower() == "true"
+        # 处理纯数字字符串
+        if result.isdigit():
+            return int(result)
+        return result
     if isinstance(obj, dict):
         return {k: _replace_env_vars(v) for k, v in obj.items()}
     if isinstance(obj, list):

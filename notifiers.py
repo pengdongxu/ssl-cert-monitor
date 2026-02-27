@@ -20,6 +20,8 @@ def send_email(config: dict, message: str, subject: str) -> None:
     password = config["smtp_password"]
     sender = config.get("sender", user)
     recipients = config["recipients"]
+    if isinstance(recipients, str):
+        recipients = [r.strip() for r in recipients.split(",") if r.strip()]
     use_ssl = config.get("use_ssl", True)
 
     msg = MIMEMultipart()

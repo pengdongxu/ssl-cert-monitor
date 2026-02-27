@@ -15,14 +15,13 @@ alert_thresholds: [30, 14, 7, 1]
 # 通知渠道配置
 notifiers:
   email:
-    enabled: false
-    smtp_host: smtp.example.com
-    smtp_port: 465
+    enabled: ${EMAIL_ENABLED:-false}
+    smtp_host: ${SMTP_HOST:-smtp.example.com}
+    smtp_port: ${SMTP_PORT:-465}
     smtp_user: ${SMTP_USER}
     smtp_password: ${SMTP_PASSWORD}
-    sender: ${SMTP_USER}
-    recipients:
-      - admin@example.com
+    sender: ${SMTP_SENDER:-${SMTP_USER}}
+    recipients: ${SMTP_RECIPIENTS}
     use_ssl: true
 
   wecom:
